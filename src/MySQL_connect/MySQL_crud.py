@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional, Union, Tuple
 import os
 import pandas as pd
 import pymysql
@@ -41,11 +41,13 @@ class mysql_crud_operations:
         except pymysql.Error as e:
             logger.error(f"Error connecting to the database: {e}")
 
-    def execute_query(self, query: str, params: Optional[List[Any]] = None) -> None:
+    def execute_query(self, query: str, params: Optional[Union[List[Any], Tuple[Any, ...]]] = None) -> None:
         connection = self.create_connection()
         if connection is not None:
             try:
                 cursor = connection.cursor()
+                if isinstance(params, tuple):
+                    params = list(params)
                 cursor.execute(query, params)
                 connection.commit()
             except pymysql.Error as e:
