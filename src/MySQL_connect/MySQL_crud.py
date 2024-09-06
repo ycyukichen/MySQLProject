@@ -1,10 +1,8 @@
 from typing import Any, Dict, List, Optional
 import os
-import json
 import pandas as pd
 import pymysql
 import logging
-from ensure import ensure_annotations
 from dotenv import load_dotenv
 
 # Configure logging
