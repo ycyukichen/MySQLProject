@@ -1,5 +1,5 @@
 import unittest
-from MySQL_crud import mysql_crud_operations
+from MySQL_crud import MySQLCRUDOperations
 import pymysql
 
 class TestMySQLCRUDOperations(unittest.TestCase):

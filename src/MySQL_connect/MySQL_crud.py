@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-class mysql_crud_operations:
+class MySQLCRUDOperations:
     def __init__(self):
         self.host = os.getenv("DB_HOST")
         self.user = os.getenv("DB_USER")
