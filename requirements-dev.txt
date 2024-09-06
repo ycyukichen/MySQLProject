@@ -1,8 +1,11 @@
 pymysql
 pandas
 numpy
+python-dotenv
 ensure
 pytest
+pytest-mock
+coverage
 
 
 
