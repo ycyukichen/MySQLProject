@@ -12,18 +12,19 @@ logger = logging.getLogger(__name__)
 # Load environment variables from .env file
 load_dotenv()
 
+
 class mysql_crud_operations:
     def __init__(self):
-        self.host = os.getenv('DB_HOST')
-        self.user = os.getenv('DB_USER')
-        self.password = os.getenv('DB_PASSWORD')
-        self.database = os.getenv('DB_NAME')
-        self.port = int(os.getenv('DB_PORT', 3306))
-        self.use_ssl = os.getenv('USE_SSL', 'False') == 'True'
-        self.ssl_ca = os.getenv('SSL_CA', None)
+        self.host = os.getenv("DB_HOST")
+        self.user = os.getenv("DB_USER")
+        self.password = os.getenv("DB_PASSWORD")
+        self.database = os.getenv("DB_NAME")
+        self.port = int(os.getenv("DB_PORT", 3306))
+        self.use_ssl = os.getenv("USE_SSL", "False") == "True"
+        self.ssl_ca = os.getenv("SSL_CA", None)
 
     def create_connection(self):
-        ssl_settings = {'ca': self.ssl_ca} if self.use_ssl else None
+        ssl_settings = {"ca": self.ssl_ca} if self.use_ssl else None
         try:
             connection = pymysql.connect(
                 host=self.host,
@@ -31,9 +32,9 @@ class mysql_crud_operations:
                 passwd=self.password,
                 db=self.database,
                 port=self.port,
-                charset='utf8mb4',
+                charset="utf8mb4",
                 cursorclass=pymysql.cursors.DictCursor,
-                ssl=ssl_settings
+                ssl=ssl_settings,
             )
             logger.info("Database connection successful!")
             return connection
@@ -80,7 +81,9 @@ class mysql_crud_operations:
         query = f"SELECT * FROM {table_name} WHERE {condition_strings}"
         self.execute_query(query, values)
 
-    def update_records(self, table_name: str, data: Dict[str, Any], conditions: Dict[str, Any]) -> None:
+    def update_records(
+        self, table_name: str, data: Dict[str, Any], conditions: Dict[str, Any]
+    ) -> None:
         set_clause = ", ".join([f"{key} = %s" for key in data.keys()])
         condition_clause = " AND ".join([f"{key} = %s" for key in conditions.keys()])
         query = f"UPDATE {table_name} SET {set_clause} WHERE {condition_clause}"
@@ -98,8 +101,7 @@ class mysql_crud_operations:
             data = pd.read_csv(datafile)
         elif datafile.endswith(".xlsx"):
             data = pd.read_excel(datafile)
-        
-        records = data.to_dict(orient='records')
+
+        records = data.to_dict(orient="records")
         for record in records:
             self.insert_record(table_name, record)
-
