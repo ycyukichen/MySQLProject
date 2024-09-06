@@ -1,0 +1,7 @@
+pymysql
+pandas
+numpy
+ensure
+pytest
+
+-e .
