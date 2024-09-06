@@ -49,4 +49,3 @@ class TestMySQLCRUDOperations(unittest.TestCase):
         self.db.insert_record('test_table', {'name': 'John'})
         with self.assertRaises(pymysql.err.IntegrityError):
             self.db.insert_record('test_table', {'name': 'John'})
-            
