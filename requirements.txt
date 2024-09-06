@@ -3,6 +3,7 @@ pandas
 numpy
 python-dotenv
 ensure
+types-PyMySQL
 
 pytest
 pytest-mock
