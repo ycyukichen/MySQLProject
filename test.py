@@ -1,19 +1,9 @@
 import unittest
-from src.MySQL_crud import MySQLCRUDOperations
+from MySQL_crud import MySQLCRUDOperations
 import pymysql
 
 
 class TestMySQLCRUDOperations(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Set up a connection to a test database
-        cls.db = MySQLCRUDOperations(host='localhost', user='test', password='test', database='testdb')
-
-    @classmethod
-    def tearDownClass(cls):
-        # Close database connection
-        cls.db.close_connection()
-
     def setUp(self):
         # Create tables or setup database state before each test
         self.db.execute_query("CREATE TEMPORARY TABLE test_table (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))")
