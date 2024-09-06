@@ -1,5 +1,6 @@
 import unittest
-from MySQL_crud import MySQLCRUDOperations
+from MySQL_crud import mysql_crud_operations
+import pymysql
 
 class TestMySQLCRUDOperations(unittest.TestCase):
     @classmethod
@@ -45,5 +46,5 @@ class TestMySQLCRUDOperations(unittest.TestCase):
     def test_insert_duplicate_record(self):
         # Test error handling for duplicate records
         self.db.insert_record('test_table', {'name': 'John'})
-        with self.assertRaises(SomeDatabaseError):
+        with self.assertRaises(pymysql.err.IntegrityError):
             self.db.insert_record('test_table', {'name': 'John'})
