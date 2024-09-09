@@ -7,8 +7,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class mysql_crud_operations:
-    def __init__(self, host: str, user: str, password: str, database: str, port: int, use_ssl: bool = False, ssl_ca: Optional[str] = None):
+    def __init__(self, host: str, user: str, password: str, database: str, 
+                 port: int, use_ssl: bool = False, ssl_ca: Optional[str] = None):
         self.host = host
         self.user = user
         self.password = password
@@ -52,7 +54,7 @@ class mysql_crud_operations:
 
     def insert_record(self, table_name: str, data: Dict[str, Any]) -> None:
         keys = ", ".join(data.keys())
-        values = tuple(data.values())
+        values = list(data.values())  # Fix: Convert tuple to list
         placeholders = ", ".join(["%s"] * len(data))
         query = f"INSERT INTO {table_name} ({keys}) VALUES ({placeholders})"
         self.execute_query(query, values)
@@ -73,21 +75,22 @@ class mysql_crud_operations:
 
     def find_records(self, table_name: str, conditions: Dict[str, Any]) -> None:
         condition_strings = " AND ".join([f"{k} = %s" for k in conditions.keys()])
-        values = tuple(conditions.values())
+        values = list(conditions.values())  # Fix: Convert tuple to list
         query = f"SELECT * FROM {table_name} WHERE {condition_strings}"
         self.execute_query(query, values)
 
-    def update_records(self, table_name: str, data: Dict[str, Any], conditions: Dict[str, Any]) -> None:
+    def update_records(self, table_name: str, data: Dict[str, Any], 
+                       conditions: Dict[str, Any]) -> None:
         set_clause = ", ".join([f"{key} = %s" for key in data.keys()])
         condition_clause = " AND ".join([f"{key} = %s" for key in conditions.keys()])
         query = f"UPDATE {table_name} SET {set_clause} WHERE {condition_clause}"
-        values = list(data.values()) + list(conditions.values())
+        values = list(data.values()) + list(conditions.values())  # Fix: Convert to list
         self.execute_query(query, values)
 
     def delete_records(self, table_name: str, conditions: Dict[str, Any]) -> None:
         condition_clause = " AND ".join([f"{key} = %s" for key in conditions.keys()])
         query = f"DELETE FROM {table_name} WHERE {condition_clause}"
-        values = tuple(conditions.values())
+        values = list(conditions.values())  # Fix: Convert tuple to list
         self.execute_query(query, values)
 
     def insert_in_bulk(self, datafile: str, table_name: str) -> None:
@@ -97,8 +100,9 @@ class mysql_crud_operations:
             data = pd.read_excel(datafile)
         
         records = data.to_dict(orient='records')
-        query = f"INSERT INTO {table_name} ({', '.join(records[0].keys())}) VALUES ({', '.join(['%s'] * len(records[0]))})"
-        values = [tuple(record.values()) for record in records]
+        query = f"INSERT INTO {table_name} ({', '.join(records[0].keys())}) " \
+                f"VALUES ({', '.join(['%s'] * len(records[0]))})"
+        values = [list(record.values()) for record in records]  # Fix: Convert to list
         
         connection = self.create_connection()
         if connection is not None:
