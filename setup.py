@@ -14,7 +14,7 @@ Hyphen_e = '-e .'
 #     return requirements
     
 setup(
-    name="MySQL_Project",
+    name="MySQLProject",
     version="0.1.0",
     author="Yu-Yu",
     author_email="yc0688a@american.edu",
