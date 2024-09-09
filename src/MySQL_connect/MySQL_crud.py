@@ -1,30 +1,24 @@
-from typing import Any, List, Optional, Union, Tuple, Dict
-import os
-import pandas as pd
 import pymysql
+import pandas as pd
+from typing import List, Dict, Any, Optional
 import logging
-from dotenv import load_dotenv
 
-# Configure logging
+# Set up logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env file
-load_dotenv()
-
-
-class MySQLCRUDOperations:
-    def __init__(self):
-        self.host = os.getenv("DB_HOST")
-        self.user = os.getenv("DB_USER")
-        self.password = os.getenv("DB_PASSWORD")
-        self.database = os.getenv("DB_NAME")
-        self.port = int(os.getenv("DB_PORT", 3306))
-        self.use_ssl = os.getenv("USE_SSL", "False") == "True"
-        self.ssl_ca = os.getenv("SSL_CA", None)
+class mysql_crud_operations:
+    def __init__(self, host: str, user: str, password: str, database: str, port: int, use_ssl: bool = False, ssl_ca: Optional[str] = None):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = database
+        self.port = port
+        self.use_ssl = use_ssl
+        self.ssl_ca = ssl_ca
 
     def create_connection(self):
-        ssl_settings = {"ca": self.ssl_ca} if self.use_ssl else None
+        ssl_settings = {'ca': self.ssl_ca} if self.use_ssl else None
         try:
             connection = pymysql.connect(
                 host=self.host,
@@ -32,25 +26,25 @@ class MySQLCRUDOperations:
                 passwd=self.password,
                 db=self.database,
                 port=self.port,
-                charset="utf8mb4",
+                charset='utf8mb4',
                 cursorclass=pymysql.cursors.DictCursor,
-                ssl=ssl_settings,
+                ssl=ssl_settings
             )
             logger.info("Database connection successful!")
             return connection
-        except pymysql.Error as e:
+        except pymysql.MySQLError as e:
             logger.error(f"Error connecting to the database: {e}")
+            return None
 
-    def execute_query(self, query: str, params: Optional[Union[List[Any], Tuple[Any, ...]]] = None) -> None:
+    def execute_query(self, query: str, params: Optional[List[Any]] = None) -> None:
         connection = self.create_connection()
         if connection is not None:
             try:
                 cursor = connection.cursor()
-                if isinstance(params, tuple):
-                    params = list(params)
                 cursor.execute(query, params)
                 connection.commit()
-            except pymysql.Error as e:
+                logger.info(f"Query executed: {query}")
+            except pymysql.MySQLError as e:
                 logger.error(f"An error occurred: {e}")
             finally:
                 cursor.close()
@@ -83,9 +77,7 @@ class MySQLCRUDOperations:
         query = f"SELECT * FROM {table_name} WHERE {condition_strings}"
         self.execute_query(query, values)
 
-    def update_records(
-        self, table_name: str, data: Dict[str, Any], conditions: Dict[str, Any]
-    ) -> None:
+    def update_records(self, table_name: str, data: Dict[str, Any], conditions: Dict[str, Any]) -> None:
         set_clause = ", ".join([f"{key} = %s" for key in data.keys()])
         condition_clause = " AND ".join([f"{key} = %s" for key in conditions.keys()])
         query = f"UPDATE {table_name} SET {set_clause} WHERE {condition_clause}"
@@ -103,7 +95,18 @@ class MySQLCRUDOperations:
             data = pd.read_csv(datafile)
         elif datafile.endswith(".xlsx"):
             data = pd.read_excel(datafile)
-
-        records = data.to_dict(orient="records")
-        for record in records:
-            self.insert_record(table_name, record)
+        
+        records = data.to_dict(orient='records')
+        query = f"INSERT INTO {table_name} ({', '.join(records[0].keys())}) VALUES ({', '.join(['%s'] * len(records[0]))})"
+        values = [tuple(record.values()) for record in records]
+        
+        connection = self.create_connection()
+        if connection is not None:
+            try:
+                cursor = connection.cursor()
+                cursor.executemany(query, values)
+                connection.commit()
+                logger.info(f"Bulk insert completed for {len(records)} records.")
+            finally:
+                cursor.close()
+                connection.close()
